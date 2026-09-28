@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelos de memoria en sistemas paralelos – Actividad 5</title>
+<style>
+:root{--bg:#06122b;--card:#0d2247;--card2:#12305f;--line:#1f4b8f;--tx:#e8f1ff;--mut:#9db8e0;--a:#38bdf8;--b:#3b82f6;--c:#22d3ee;--ok:#5eead4;--bad:#fca5a5}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Segoe UI",system-ui,Arial,sans-serif;background:radial-gradient(circle at 20% 0,#0b2a5c 0,var(--bg) 55%);color:var(--tx);line-height:1.5;padding:24px 16px 48px}
+.w{max-width:1050px;margin:auto}
+header{border:1px solid var(--line);border-radius:20px;padding:26px;background:linear-gradient(135deg,#0f3a7d,#0a1e45);position:relative;overflow:hidden}
+header:after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(var(--a),transparent 70%);opacity:.35}
+.tag{display:inline-block;background:#0b1f44;border:1px solid var(--a);color:var(--a);border-radius:99px;padding:2px 12px;font-size:.78rem;margin:0 6px 8px 0}
+h1{font-size:clamp(1.6rem,4vw,2.5rem);line-height:1.15}
+h1 span{color:var(--a)}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:16px;font-size:.88rem}
+.meta div{background:#0a1a3acc;border-radius:10px;padding:8px 12px}.meta b{display:block;color:var(--mut);font-weight:500;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em}
+h2{font-size:1.25rem;margin:34px 0 12px;color:var(--a)}
+.tabs{display:flex;gap:10px;flex-wrap:wrap}
+.tab{flex:1;min-width:200px;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:14px;padding:14px;text-align:left;font:inherit;transition:.2s}
+.tab:hover{transform:translateY(-3px);border-color:var(--a)}
+.tab.on{background:linear-gradient(135deg,var(--b),#0e7490);border-color:var(--a)}
+.tab i{font-style:normal;font-size:1.5rem;display:block}.tab small{color:#d5e6ff;opacity:.85}
+.panel{display:none;margin-top:14px;border:1px solid var(--line);border-radius:18px;background:var(--card);padding:20px;animation:f .35s}
+.panel.on{display:block}@keyframes f{from{opacity:0;transform:translateY(8px)}}
+.def{font-size:1.02rem;border-left:4px solid var(--a);padding-left:12px;margin-bottom:14px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.box{background:var(--card2);border-radius:14px;padding:14px}
+.box h3{font-size:.95rem;margin-bottom:6px}
+.pro h3{color:var(--ok)}.con h3{color:var(--bad)}.ex h3{color:var(--a)}
+ul{padding-left:18px;font-size:.9rem}li{margin:3px 0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--a);color:var(--a);background:transparent;border-radius:99px;padding:3px 11px;font:inherit;font-size:.82rem;cursor:pointer}
+.chip:hover,.chip.on{background:var(--a);color:#06122b}
+.exd{margin-top:8px;font-size:.86rem;color:var(--mut);min-height:2.6em}
+svg{width:100%;max-height:170px;margin:4px 0 12px}
+svg text{fill:var(--tx);font-size:11px;font-family:inherit}
+.node{fill:#0b1f44;stroke:var(--a);stroke-width:1.5}
+.mem{fill:#164e8a;stroke:var(--c)}
+.lnk{stroke:var(--a);stroke-width:2;stroke-dasharray:5 4;animation:d 1.2s linear infinite}@keyframes d{to{stroke-dashoffset:-18}}
+.tw{overflow-x:auto;border-radius:14px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:.86rem;min-width:640px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#0f3a7d}td:first-child{color:var(--a);font-weight:600;background:#0a1a3a;width:15%}
+tbody tr:hover td{background:#12305f}
+.sim{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:700px){.sim{grid-template-columns:1fr}}
+.bar{height:26px;border-radius:8px;background:linear-gradient(90deg,var(--b),var(--c));width:20%;transition:width .5s;display:flex;align-items:center;padding-left:10px;font-size:.8rem;font-weight:600;color:#06122b}
+.btn{background:var(--b);color:#fff;border:0;border-radius:10px;padding:8px 14px;font:inherit;cursor:pointer;margin:0 6px 8px 0}.btn:hover{background:var(--a);color:#06122b}
+.rec{background:var(--card2);border-radius:12px;padding:12px;font-size:.9rem;min-height:5em}
+.refs li{margin:8px 0;font-size:.84rem}.refs a{color:var(--a);word-break:break-all}.refs em{color:var(--mut)}
+footer{margin-top:28px;text-align:center;color:var(--mut);font-size:.78rem}
+.note{font-size:.78rem;color:var(--mut);margin-top:6px}
+@media print{
+ @page{size:A4;margin:10mm}
+ body{background:var(--bg);-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:0}
+ .panel{display:block!important;animation:none;break-inside:avoid}
+ .tabs,.chips,.btn,.hint{display:none!important}
+ .box,.tab,header,.tw,.rec{break-inside:avoid}
+ h2{break-after:avoid}
+}
+</style>
+</head>
+<body>
+<div class="w">
+
+<header>
+ <span class="tag">Actividad 5</span><span class="tag">Seminario · 100 puntos</span><span class="tag">Competencia: Pensamiento crítico</span>
+ <h1>Modelos de memoria en <span>sistemas paralelos</span></h1>
+ <p style="color:var(--mut);margin-top:6px">Cuadro comparativo: memoria compartida, distribuida e híbrida (NUMA y arquitecturas modernas)</p>
+ <div class="meta">
+  <div><b>Alumna</b>Alondra Goretti González Martínez</div>
+  <div><b>Código</b>218534681</div>
+  <div><b>Actividad</b>5 – Seminario</div>
+  <div><b>Fecha de entrega</b>2 de octubre, 23:59</div>
+ </div>
+</header>
+
+<h2>1 · Explora cada modelo <span class="hint" style="font-size:.8rem;color:var(--mut)">(haz clic en las pestañas y en los ejemplos)</span></h2>
+<div class="tabs" id="tabs">
+ <button class="tab on" data-t="0"><i>🧠</i><b>Memoria compartida</b><br><small>Un solo espacio de direcciones</small></button>
+ <button class="tab" data-t="1"><i>🌐</i><b>Memoria distribuida</b><br><small>Cada nodo con su memoria</small></button>
+ <button class="tab" data-t="2"><i>🧩</i><b>Memoria híbrida / NUMA</b><br><small>Lo mejor de ambos mundos</small></button>
+</div>
+
+<!-- COMPARTIDA -->
+<section class="panel on">
+ <svg viewBox="0 0 600 150" aria-label="Diagrama memoria compartida">
+  <g class="node"><rect x="50" y="15" width="70" height="34" rx="8"/><rect x="170" y="15" width="70" height="34" rx="8"/><rect x="290" y="15" width="70" height="34" rx="8"/><rect x="410" y="15" width="70" height="34" rx="8"/></g>
+  <text x="70" y="37">CPU 0</text><text x="190" y="37">CPU 1</text><text x="310" y="37">CPU 2</text><text x="430" y="37">CPU 3</text>
+  <rect x="40" y="70" width="450" height="14" rx="7" fill="#1d4ed8"/><text x="200" y="81" style="font-size:10px">Bus / interconexión</text>
+  <g stroke="#38bdf8" stroke-width="2"><line x1="85" y1="49" x2="85" y2="70"/><line x1="205" y1="49" x2="205" y2="70"/><line x1="325" y1="49" x2="325" y2="70"/><line x1="445" y1="49" x2="445" y2="70"/><line x1="265" y1="84" x2="265" y2="104" class="lnk"/></g>
+  <rect class="mem" x="140" y="104" width="250" height="34" rx="8"/><text x="200" y="125">Memoria RAM única (compartida)</text>
+ </svg>
+ <p class="def"><b>En mis palabras:</b> todos los procesadores o núcleos ven la misma memoria, como varias personas escribiendo en un mismo pizarrón. Se comunican leyendo y escribiendo las mismas variables.</p>
+ <div class="cols">
+  <div class="box pro"><h3>✔ Ventajas</h3><ul><li>Programación más sencilla (hilos, OpenMP).</li><li>Comunicación muy rápida entre hilos.</li><li>Sin copiar datos entre procesadores.</li><li>Fácil de depurar frente a paso de mensajes.</li></ul></div>
+  <div class="box con"><h3>✘ Limitaciones</h3><ul><li>Escala poco: el bus/memoria se satura.</li><li>Riesgo de condiciones de carrera; requiere sincronización (locks).</li><li>Coherencia de caché costosa al crecer.</li><li>Costo alto de hardware al aumentar núcleos.</li></ul></div>
+  <div class="box ex"><h3>🏭 Aplicaciones reales</h3><div class="chips" data-g="0">
+   <button class="chip" data-d="Procesadores multicore de laptops, celulares y PC (Intel Core, AMD Ryzen, Apple M): los núcleos comparten RAM y caché L3.">Multicore</button>
+   <button class="chip" data-d="Servidores SMP de una sola tarjeta para bases de datos y servidores web, con hilos que comparten el mismo espacio de memoria.">Servidores SMP</button>
+   <button class="chip" data-d="Programación con OpenMP/pthreads: renderizado, edición de video y simulaciones en una sola máquina.">OpenMP / hilos</button></div>
+   <p class="exd">Toca un ejemplo para ver detalles.</p></div>
+ </div>
+</section>
+
+<!-- DISTRIBUIDA -->
+<section class="panel">
+ <svg viewBox="0 0 600 150" aria-label="Diagrama memoria distribuida">
+  <g class="node"><rect x="20" y="10" width="100" height="90" rx="10"/><rect x="170" y="10" width="100" height="90" rx="10"/><rect x="320" y="10" width="100" height="90" rx="10"/><rect x="470" y="10" width="100" height="90" rx="10"/></g>
+  <g class="mem"><rect x="32" y="62" width="76" height="26" rx="6"/><rect x="182" y="62" width="76" height="26" rx="6"/><rect x="332" y="62" width="76" height="26" rx="6"/><rect x="482" y="62" width="76" height="26" rx="6"/></g>
+  <g><text x="50" y="35">CPU 0</text><text x="200" y="35">CPU 1</text><text x="350" y="35">CPU 2</text><text x="500" y="35">CPU 3</text><text x="45" y="79">RAM propia</text><text x="195" y="79">RAM propia</text><text x="345" y="79">RAM propia</text><text x="495" y="79">RAM propia</text></g>
+  <rect x="20" y="118" width="550" height="14" rx="7" fill="#1d4ed8"/><text x="230" y="129" style="font-size:10px">Red (Ethernet / InfiniBand) · paso de mensajes</text>
+  <g stroke="#38bdf8" stroke-width="2" class="lnk"><line x1="70" y1="100" x2="70" y2="118"/><line x1="220" y1="100" x2="220" y2="118"/><line x1="370" y1="100" x2="370" y2="118"/><line x1="520" y1="100" x2="520" y2="118"/></g>
+ </svg>
+ <p class="def"><b>En mis palabras:</b> cada computadora (nodo) tiene su propia memoria privada y, para colaborar, se mandan mensajes por la red, como equipos que trabajan en oficinas distintas y se comunican por correo.</p>
+ <div class="cols">
+  <div class="box pro"><h3>✔ Ventajas</h3><ul><li>Escalabilidad enorme: se añaden nodos.</li><li>Costo bajo con hardware comercial.</li><li>Sin conflictos de acceso a memoria común.</li><li>Tolerancia a fallas: cae un nodo, no todo.</li></ul></div>
+  <div class="box con"><h3>✘ Limitaciones</h3><ul><li>Programación más difícil (MPI, particionar datos).</li><li>Latencia y ancho de banda de red limitan.</li><li>Comunicación explícita y costosa.</li><li>Balanceo de carga complejo.</li></ul></div>
+  <div class="box ex"><h3>🏭 Aplicaciones reales</h3><div class="chips" data-g="1">
+   <button class="chip" data-d="Clústeres Beowulf y de universidades/empresas: muchos servidores conectados para simulación, ingeniería y ciencia de datos.">Clústeres</button>
+   <button class="chip" data-d="Cloud computing: servicios como AWS, Azure o Google Cloud reparten cargas en miles de nodos; Kubernetes y Spark coordinan tareas.">Cloud</button>
+   <button class="chip" data-d="Supercomputadoras con MPI para clima, física y biología; son en esencia miles de nodos conectados con redes de alta velocidad.">Supercomputadoras (MPI)</button></div>
+   <p class="exd">Toca un ejemplo para ver detalles.</p></div>
+ </div>
+</section>
+
+<!-- HIBRIDA -->
+<section class="panel">
+ <svg viewBox="0 0 600 150" aria-label="Diagrama NUMA">
+  <g class="node"><rect x="30" y="10" width="230" height="95" rx="12"/><rect x="340" y="10" width="230" height="95" rx="12"/></g>
+  <g class="node"><rect x="45" y="22" width="90" height="30" rx="7"/><rect x="155" y="22" width="90" height="30" rx="7"/><rect x="355" y="22" width="90" height="30" rx="7"/><rect x="465" y="22" width="90" height="30" rx="7"/></g>
+  <g class="mem"><rect x="60" y="66" width="170" height="28" rx="7"/><rect x="370" y="66" width="170" height="28" rx="7"/></g>
+  <text x="70" y="41">Núcleos</text><text x="177" y="41">Núcleos</text><text x="378" y="41">Núcleos</text><text x="487" y="41">Núcleos</text>
+  <text x="85" y="84">Memoria local nodo 0</text><text x="395" y="84">Memoria local nodo 1</text>
+  <line x1="260" y1="58" x2="340" y2="58" class="lnk"/><text x="253" y="120" style="font-size:10px">interconexión entre sockets</text>
+  <text x="90" y="140" style="font-size:10px;fill:#9db8e0">Todo forma un espacio de direcciones, pero acceder a la memoria del otro nodo tarda más</text>
+ </svg>
+ <p class="def"><b>En mis palabras:</b> combina lo anterior: dentro de un nodo o socket los núcleos comparten memoria, y entre nodos se comunican por red o interconexión. En NUMA, la memoria «cercana» responde más rápido que la «lejana».</p>
+ <div class="cols">
+  <div class="box pro"><h3>✔ Ventajas</h3><ul><li>Escala mejor que la compartida pura.</li><li>Aprovecha la rapidez local de cada nodo.</li><li>Soporta modelos MPI + OpenMP.</li><li>Flexible: sirve para nube y HPC.</li></ul></div>
+  <div class="box con"><h3>✘ Limitaciones</h3><ul><li>Rendimiento depende de dónde se ubican los datos.</li><li>Programación y ajuste (afinidad) más complejos.</li><li>Acceso remoto más lento y menos predecible.</li><li>Coherencia de caché entre nodos costosa.</li></ul></div>
+  <div class="box ex"><h3>🏭 Aplicaciones reales</h3><div class="chips" data-g="2">
+   <button class="chip" data-d="Servidores multi-socket (AMD EPYC, Intel Xeon): cada socket tiene su memoria y los sistemas operativos reconocen nodos NUMA.">Servidores NUMA</button>
+   <button class="chip" data-d="Supercomputadoras modernas del TOP500 (p. ej. Frontier, El Capitan): nodos con CPU+GPU, y MPI entre nodos con hilos/aceleradores dentro.">TOP500 (CPU+GPU)</button>
+   <button class="chip" data-d="Instancias grandes en la nube (alta memoria, varios sockets) y bases de datos en memoria que deben ajustarse a la topología NUMA.">Cloud / BD en memoria</button></div>
+   <p class="exd">Toca un ejemplo para ver detalles.</p></div>
+ </div>
+ <div class="box" style="margin-top:14px"><h3 style="color:var(--a)">⚡ Mini simulador NUMA (valores relativos ilustrativos)</h3>
+  <button class="btn" onclick="acc(1)">Acceso a memoria LOCAL</button><button class="btn" onclick="acc(2)">Acceso a memoria REMOTA</button>
+  <div class="bar" id="bar">Elige un acceso</div><p class="note" id="bt">Ejemplo educativo: en muchos servidores el acceso remoto puede costar ≈1.5–2 veces más tiempo que el local; varía según el hardware.</p></div>
+</section>
+
+<h2>2 · Cuadro comparativo</h2>
+<div class="tw"><table>
+<thead><tr><th></th><th>Memoria compartida</th><th>Memoria distribuida</th><th>Memoria híbrida (NUMA)</th></tr></thead>
+<tbody>
+<tr><td>Definición</td><td>Todos los procesadores acceden a una misma memoria.</td><td>Cada nodo tiene memoria privada; se comunican por mensajes.</td><td>Memoria compartida dentro del nodo y distribuida entre nodos; acceso no uniforme.</td></tr>
+<tr><td>Comunicación</td><td>Lectura/escritura de variables</td><td>Paso de mensajes (MPI)</td><td>Hilos locales + mensajes/interconexión</td></tr>
+<tr><td>Escalabilidad</td><td>Baja–media</td><td>Muy alta</td><td>Alta</td></tr>
+<tr><td>Dificultad de programar</td><td>Media (sincronización)</td><td>Alta (particionar datos)</td><td>Alta (afinidad y ubicación de datos)</td></tr>
+<tr><td>Ventaja clave</td><td>Simplicidad y rapidez local</td><td>Crecer sin límite y bajo costo</td><td>Equilibrio entre rendimiento y escala</td></tr>
+<tr><td>Limitación clave</td><td>Cuello de botella en memoria/bus</td><td>Latencia de red</td><td>Penalización por acceso remoto</td></tr>
+<tr><td>Ejemplos</td><td>Multicore, servidores SMP</td><td>Clústeres, cloud, supercomputadoras</td><td>Servidores multi-socket, TOP500, nube de alto rendimiento</td></tr>
+</tbody></table></div>
+
+<h2>3 · Pensamiento crítico: ¿qué modelo elegir?</h2>
+<div class="box">
+ <p style="font-size:.9rem;margin-bottom:8px">Elige un escenario y analiza la decisión (es mi propuesta de razonamiento):</p>
+ <button class="btn" onclick="rc(0)">App de escritorio con procesamiento de video</button>
+ <button class="btn" onclick="rc(1)">Simulación del clima con millones de datos</button>
+ <button class="btn" onclick="rc(2)">Base de datos en memoria en un servidor grande</button>
+ <div class="rec" id="rec">Selecciona un escenario…</div>
+</div>
+<div class="box" style="margin-top:12px"><h3 style="color:var(--a)">Reflexión</h3>
+ <p style="font-size:.9rem">No existe un modelo «mejor» en abstracto: la memoria compartida gana en simplicidad pero choca con límites físicos; la distribuida gana en escala pero exige rediseñar algoritmos para minimizar mensajes; y el modelo híbrido, dominante hoy, traslada la complejidad al programador (ubicación de datos). Elegir bien depende del tamaño del problema, el presupuesto y la habilidad del equipo.</p></div>
+
+<h2>4 · Fuentes y bibliografía</h2>
+<ol class="refs">
+ <li>Barney, B. <em>Introduction to Parallel Computing Tutorial</em>. Lawrence Livermore National Laboratory (HPC). <a href="https://hpc.llnl.gov/documentation/tutorials/introduction-parallel-computing-tutorial" target="_blank" rel="noopener">hpc.llnl.gov/documentation/tutorials/introduction-parallel-computing-tutorial</a><br><em>Usada para: clasificación de arquitecturas de memoria (compartida, distribuida, híbrida), ventajas y desventajas.</em></li>
+ <li>Wikipedia. «Shared memory». <a href="https://en.wikipedia.org/wiki/Shared_memory" target="_blank" rel="noopener">en.wikipedia.org/wiki/Shared_memory</a><br><em>Usada para: concepto de memoria compartida y problemas de sincronización.</em></li>
+ <li>Wikipedia. «Distributed memory». <a href="https://en.wikipedia.org/wiki/Distributed_memory" target="_blank" rel="noopener">en.wikipedia.org/wiki/Distributed_memory</a><br><em>Usada para: memoria privada por nodo y paso de mensajes.</em></li>
+ <li>Wikipedia. «Non-uniform memory access». <a href="https://en.wikipedia.org/wiki/Non-uniform_memory_access" target="_blank" rel="noopener">en.wikipedia.org/wiki/Non-uniform_memory_access</a><br><em>Usada para: NUMA, acceso local vs. remoto.</em></li>
+ <li>TOP500. <em>The TOP500 list</em>. <a href="https://www.top500.org" target="_blank" rel="noopener">top500.org</a><br><em>Usada para: ejemplos de supercomputadoras modernas (Frontier, El Capitan).</em></li>
+ <li>MPI Forum – <a href="https://www.mpi-forum.org" target="_blank" rel="noopener">mpi-forum.org</a> y OpenMP ARB – <a href="https://www.openmp.org" target="_blank" rel="noopener">openmp.org</a><br><em>Usadas para: modelos de programación asociados (MPI para distribuida, OpenMP para compartida).</em></li>
+ <li>Claude (IA de Anthropic), <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a>, sept. 2026.<br><em>Usado para: organizar la información, redactar definiciones y ejemplos, diseñar la infografía y el simulador. Las cifras del simulador son ilustrativas.</em></li>
+</ol>
+
+<footer>Alondra Goretti González Martínez · Código 218534681 · Actividad 5 – Seminario · Competencia: Pensamiento crítico · Entrega: 2 de octubre, 23:59</footer>
+</div>
+
+<script>
+const T=document.querySelectorAll('.tab'),P=document.querySelectorAll('.panel');
+T.forEach(b=>b.onclick=()=>{T.forEach(x=>x.classList.remove('on'));P.forEach(x=>x.classList.remove('on'));b.classList.add('on');P[b.dataset.t].classList.add('on')});
+document.querySelectorAll('.chips').forEach(g=>{const out=g.parentElement.querySelector('.exd');g.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{g.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');out.textContent=c.dataset.d})});
+function acc(r){const b=document.getElementById('bar');b.style.width=(r==1?35:65)+'%';b.textContent=r==1?'Local · 1x':'Remoto · ≈1.8x';}
+const R=["Memoria compartida: todo ocurre en una sola máquina, los hilos comparten frames y datos, y la programación con hilos/OpenMP es simple. No se necesita escalar a cientos de nodos.","Memoria distribuida (MPI): el dominio se divide en regiones por nodo y solo se intercambian los bordes. Ningún equipo individual tiene tanta memoria, así que la escala manda.","Híbrida/NUMA: se necesita mucha RAM con acceso compartido, pero en un servidor multi-socket. Conviene fijar hilos y datos al mismo nodo NUMA para evitar accesos remotos."];
+function rc(i){document.getElementById('rec').textContent=R[i]}
+</script>
+</body>
+</html>
